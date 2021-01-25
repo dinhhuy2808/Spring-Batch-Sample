@@ -18,6 +18,7 @@ public class App
     public static void main(String[] args) {
         // Spring Java config
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+        context.scan("com.batch.util");
         context.register(SpringConfig.class);
         context.register(SpringBatchConfig.class);
         context.refresh();

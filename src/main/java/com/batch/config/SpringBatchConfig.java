@@ -26,6 +26,8 @@ import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import com.batch.mapper.RecordFieldSetMapper;
 import com.batch.model.Transaction;
 import com.batch.processor.CustomItemProcessor;
+import com.batch.reader.CustomItemReader;
+import com.batch.writer.CustomItemWriter;
 
 public class SpringBatchConfig {
     
@@ -42,19 +44,8 @@ public class SpringBatchConfig {
     private Resource outputXml;
 
     @Bean
-    public ItemReader<Transaction> itemReader()
-      throws UnexpectedInputException, ParseException {
-        FlatFileItemReader<Transaction> reader = new FlatFileItemReader<Transaction>();
-        DelimitedLineTokenizer tokenizer = new DelimitedLineTokenizer();
-        String[] tokens = { "username", "userid", "transactiondate", "amount" };
-        tokenizer.setNames(tokens);
-        reader.setResource(inputCsv);
-        DefaultLineMapper<Transaction> lineMapper = 
-          new DefaultLineMapper<Transaction>();
-        lineMapper.setLineTokenizer(tokenizer);
-        lineMapper.setFieldSetMapper(new RecordFieldSetMapper());
-        reader.setLineMapper(lineMapper);
-        return reader;
+    public ItemReader<Transaction> itemReader() {
+        return new CustomItemReader();
     }
 
     @Bean
@@ -63,14 +54,8 @@ public class SpringBatchConfig {
     }
 
     @Bean
-    public ItemWriter<Transaction> itemWriter(Marshaller marshaller)
-      throws MalformedURLException {
-        StaxEventItemWriter<Transaction> itemWriter = 
-          new StaxEventItemWriter<Transaction>();
-        itemWriter.setMarshaller(marshaller);
-        itemWriter.setRootTagName("transactionRecord");
-        itemWriter.setResource(outputXml);
-        return itemWriter;
+    public ItemWriter<Transaction> itemWriter(Marshaller marshaller){
+        return new CustomItemWriter();
     }
 
     @Bean
@@ -84,7 +69,7 @@ public class SpringBatchConfig {
     protected Step step1(ItemReader<Transaction> reader,
       ItemProcessor<Transaction, Transaction> processor,
       ItemWriter<Transaction> writer) {
-        return steps.get("step1").<Transaction, Transaction> chunk(10)
+        return steps.get("step1").<Transaction, Transaction> chunk(1)
           .reader(reader).processor(processor).writer(writer).build();
     }
 

@@ -10,7 +10,7 @@ public class CustomItemWriter implements ItemWriter<Transaction> {
 
 	@Override
 	public void write(List<? extends Transaction> items) throws Exception {
-		
+		System.out.println("write");
 	}
 
 }
