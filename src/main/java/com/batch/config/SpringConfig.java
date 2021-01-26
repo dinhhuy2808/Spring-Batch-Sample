@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.io.Resource;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jdbc.datasource.init.DataSourceInitializer;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
@@ -51,6 +52,11 @@ public class SpringConfig {
         return dataSource;
     }
 
+    @Bean
+    public JdbcTemplate jdbcTemplate() {
+    	return new JdbcTemplate(dataSource());
+    }
+    
     @Bean
     public DataSourceInitializer dataSourceInitializer(DataSource dataSource)
       throws MalformedURLException {

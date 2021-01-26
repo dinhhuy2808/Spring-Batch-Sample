@@ -164,6 +164,15 @@ public class Util {
 		return completeName;
 	}
 
+	public void deleteFile(String path) {
+		File myObj = new File(path); 
+	    if (myObj.delete()) { 
+	      System.out.println("Deleted the file: " + myObj.getName());
+	    } else {
+	      System.out.println("Failed to delete the file.");
+	    } 
+
+	}
 	public static void main(String[] args) {
 		Util util = new Util();
 		String startWith = String.format("%s", "1");
