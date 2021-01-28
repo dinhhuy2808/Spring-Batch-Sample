@@ -21,11 +21,11 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import com.google.gson.Gson;
 
-@Component
+@Service
 public class Util {
 
 	public <T> T jsonToObject(String json, Class<T> destination) {
@@ -172,10 +172,5 @@ public class Util {
 	      System.out.println("Failed to delete the file.");
 	    } 
 
-	}
-	public static void main(String[] args) {
-		Util util = new Util();
-		String startWith = String.format("%s", "1");
-		System.out.println(startWith);
 	}
 }

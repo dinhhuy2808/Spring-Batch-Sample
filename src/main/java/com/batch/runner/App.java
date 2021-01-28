@@ -5,9 +5,14 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.ComponentScans;
 
 import com.batch.config.SpringBatchConfig;
 import com.batch.config.SpringConfig;
+import com.batch.dao.impl.ResultDaoImpl;
+import com.batch.service.SendEmail;
+import com.batch.util.Util;
 
 /**
  * Hello world!
@@ -20,8 +25,9 @@ public class App
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
         context.register(SpringConfig.class);
         context.register(SpringBatchConfig.class);
-        context.scan("com.batch.util");
-        context.scan("com.batch.dao.impl");
+        context.register(Util.class);
+        context.register(ResultDaoImpl.class);
+        context.register(SendEmail.class);
         context.refresh();
         
         JobLauncher jobLauncher = (JobLauncher) context.getBean("jobLauncher");

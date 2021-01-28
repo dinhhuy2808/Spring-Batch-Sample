@@ -17,9 +17,10 @@ import com.batch.model.Result;
 /**
  * A DataAccessObject has the responsibility to do all SQL for us.
  */
-@Repository
+@Repository("resultDaoImpl")
 @Transactional(rollbackFor = Exception.class)
 public class ResultDaoImpl implements ResultDao {
+	
 	@Autowired
 	JdbcTemplate jdbcTemplate;
 
