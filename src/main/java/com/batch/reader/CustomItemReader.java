@@ -2,10 +2,8 @@ package com.batch.reader;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -16,12 +14,10 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.batch.constant.QuestionType;
 import com.batch.dao.ResultDao;
-import com.batch.dao.impl.ResultDaoImpl;
 import com.batch.model.ProcessorInput;
 import com.batch.service.SendEmail;
 import com.batch.util.Util;
@@ -36,6 +32,9 @@ public class CustomItemReader implements ItemReader<ProcessorInput> {
 	
 	@Value("${uploadFolder}")
 	private String uploadFolder;
+
+	@Value("#{systemProperties['spring.profiles.active']}")
+	private String env;
 
 	@Autowired
 	private Util util;
@@ -79,7 +78,12 @@ public class CustomItemReader implements ItemReader<ProcessorInput> {
 		XSSFWorkbook workbook = new XSSFWorkbook(inputStream);
 		sheetsIterator = workbook.sheetIterator();
 		sheetsIterator.next();//skip first sheet
-		hsk = file.substring(file.lastIndexOf("\\")+1, file.length()).split("\\.")[0];
+		if (env.equalsIgnoreCase("production")) {
+			hsk = file.substring(file.lastIndexOf("/")+1, file.length()).split("\\.")[0];
+		} else {
+			hsk = file.substring(file.lastIndexOf("\\")+1, file.length()).split("\\.")[0];
+		}
+		
 		resultDao.delete(Integer.parseInt(hsk), QuestionType.QUIZ);
 	}
 	
