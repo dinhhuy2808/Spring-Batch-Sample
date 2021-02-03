@@ -1,5 +1,7 @@
 package com.batch.runner;
 
+import java.util.List;
+
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
@@ -23,13 +25,13 @@ public class App
     public static void main(String[] args) {
         // Spring Java config
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+        context.register(Util.class);
         context.register(SpringConfig.class);
         context.register(SpringBatchConfig.class);
-        context.register(Util.class);
         context.register(ResultDaoImpl.class);
         context.register(SendEmail.class);
         context.refresh();
-        
+        checkAndWriteLockFile(context);
         JobLauncher jobLauncher = (JobLauncher) context.getBean("jobLauncher");
         Job job = (Job) context.getBean("firstBatchJob");
         System.out.println("Starting the batch job");
@@ -40,6 +42,25 @@ public class App
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Job failed");
-        }
+        } finally {
+        	deleteLockFile(context);
+		}
+    }
+    
+    private static void checkAndWriteLockFile(AnnotationConfigApplicationContext context) {
+    	Util util = (Util) context.getBean("util");
+    	String uploadFolder = context.getEnvironment().getProperty("uploadFolder");
+    	List<String> files = util.getAllFilesNameInFolder(uploadFolder);
+    	if (files.contains("lock.lockfile")) {
+    		System.exit(0);
+    	} else {
+    		util.writeToFile("", uploadFolder+"/lock.lockfile");
+    	}
+    }
+    
+    private static void deleteLockFile(AnnotationConfigApplicationContext context) {
+    	Util util = (Util) context.getBean("util");
+    	String uploadFolder = context.getEnvironment().getProperty("uploadFolder");
+    	util.deleteFile(uploadFolder+"/lock.lockfile");
     }
 }

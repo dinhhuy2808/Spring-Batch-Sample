@@ -25,6 +25,8 @@ import org.springframework.beans.factory.annotation.Value;
 
 import com.batch.constant.Category;
 import com.batch.constant.QuestionType;
+import com.batch.model.ExerciseUploadProcessorInput;
+import com.batch.model.ExerciseUploadProcessorOutput;
 import com.batch.model.MergedRow;
 import com.batch.model.ProcessorInput;
 import com.batch.model.ProcessorOutput;
@@ -34,7 +36,7 @@ import com.batch.model.Result;
 import com.batch.util.Util;
 import com.google.common.collect.ImmutableMap;
 
-public class CustomItemProcessor implements ItemProcessor<ProcessorInput, ProcessorOutput> {
+public class ExerciseUploadProcessor implements ItemProcessor<ProcessorInput, ProcessorOutput> {
 	
 	@Autowired
 	private Util util;
@@ -64,9 +66,11 @@ public class CustomItemProcessor implements ItemProcessor<ProcessorInput, Proces
 	private static String FIELD_OPTION_TEMPMLATE = "<div class=\"field-option\"> <span class=\"field-no\">!answer_char!</span>\r\n"
 			+ "<p><span class=\"label-words\" data-wid=\"875\">!answer_description!</span></p>\r\n" + "</div>";
 
-    public ProcessorOutput process(ProcessorInput processorInput) {
+
+    public ExerciseUploadProcessorOutput process(ProcessorInput processorInput) {
+    	ExerciseUploadProcessorInput exerciseUploadProcessorInput = (ExerciseUploadProcessorInput) processorInput;
 		Set<MergedRow> mergedRows = new HashSet<>();
-		Sheet sheet = processorInput.getSheet();
+		Sheet sheet = exerciseUploadProcessorInput.getSheet();
 		sheet.getMergedRegions();
 		for (CellRangeAddress cell : sheet.getMergedRegions()) {
 			if (cell.getFirstColumn() != 0 && cell.getLastRow() != 0) {
@@ -104,7 +108,7 @@ public class CustomItemProcessor implements ItemProcessor<ProcessorInput, Proces
 			System.out.println("key: " + key);
 			System.out.println(childQuizMapFromMergedRow.get(key));
 			System.out.println(sheet.getSheetName().trim());
-			questionDescriptions.add(getQuiz(key, childQuizMapFromMergedRow.get(key), sheet, String.valueOf(processorInput.getHsk()), results));
+			questionDescriptions.add(getQuiz(key, childQuizMapFromMergedRow.get(key), sheet, String.valueOf(exerciseUploadProcessorInput.getHsk()), results));
 			String number = sheet.getRow(key.getFirstRow() - 1).getCell(5).toString();
 			if (!StringUtils.isEmpty(number) && !StringUtils.isAlphanumericSpace(number)) {
 			}
@@ -112,10 +116,10 @@ public class CustomItemProcessor implements ItemProcessor<ProcessorInput, Proces
 		questionDescriptions = questionDescriptions.stream().filter(desc -> desc != null)
 				.collect(Collectors.toList());
 		
-		ProcessorOutput output = new ProcessorOutput();
+		ExerciseUploadProcessorOutput output = new ExerciseUploadProcessorOutput();
 		output.setResults(results);
 		output.setQuestionDescriptions(questionDescriptions);
-		output.setHsk(String.valueOf(processorInput.getHsk()));
+		output.setHsk(String.valueOf(exerciseUploadProcessorInput.getHsk()));
 		output.setName(sheet.getSheetName());
         return output;
     }
@@ -157,17 +161,6 @@ public class CustomItemProcessor implements ItemProcessor<ProcessorInput, Proces
 					imageHtml = generateImageHtmlBy(value, hsk,
 							Integer.parseInt(sheet.getSheetName().trim()), imageTemp);
 					questionBody.setHeader(value.equals(imageHtml)?value:imageHtml);
-//				} else if (questionType.equals("DOC")) {
-//					header = header.replace(QUESTION_DESCRIPTION_TEMP,
-//							"");
-//					header = header.replace(IMAGE_SOURCE_TEMP,
-//							generateImageHtmlBy(sheet.getRow(mergedRow.getFirstRow() - 1).getCell(4).toString(), hsk,
-//									Integer.parseInt(sheet.getSheetName().trim()), ""));
-//					questionBody.setHeader(sheet.getRow(mergedRow.getFirstRow() - 1).getCell(6).getStringCellValue() != null
-//							? sheet.getRow(mergedRow.getFirstRow() - 1).getCell(6).getStringCellValue()
-//							: "");
-//				}
-				
 				
 				header = header.replace(AUDIO_TEMP,
 						generateAudioHtmlBy(sheet.getRow(mergedRow.getFirstRow() - 1).getCell(10), hsk,
@@ -227,6 +220,10 @@ public class CustomItemProcessor implements ItemProcessor<ProcessorInput, Proces
 				String questionType = sheet.getRow(mergedRow.getFirstRow() - 1).getCell(0).getStringCellValue();
 				if (questionType.equals("DOC")) {
 					questionDescription.setHeader(sheet.getRow(mergedRow.getFirstRow() - 1).getCell(4).toString());
+				} else if (questionType.equals("NGHE")) {
+					questionDescription
+							.setHeader(generateAudioHtmlBy(sheet.getRow(mergedRow.getFirstRow() - 1).getCell(10), hsk,
+									Integer.parseInt(sheet.getSheetName().trim())));
 				}
 				questionDescription.setBody(bodies);
 
@@ -467,4 +464,5 @@ public class CustomItemProcessor implements ItemProcessor<ProcessorInput, Proces
 										cell.toString() + ".mp3", String.format("%02d", lesson)))
 				: "";
 	}
+
 }

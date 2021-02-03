@@ -1,5 +1,7 @@
 package com.batch.config;
 
+import java.util.Map;
+
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
@@ -7,46 +9,60 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.Resource;
 
 import com.batch.model.ProcessorInput;
 import com.batch.model.ProcessorOutput;
-import com.batch.processor.CustomItemProcessor;
-import com.batch.reader.CustomItemReader;
-import com.batch.writer.CustomItemWriter;
+import com.batch.model.UploadType;
+import com.batch.processor.ExerciseUploadProcessor;
+import com.batch.reader.ExerciseUploadReader;
+import com.batch.writer.ExcerciseUploadWriter;
+import com.google.common.collect.ImmutableMap;
 
-public class SpringBatchConfig {
-    
+public class SpringBatchConfig implements InitializingBean {
+	private static final ImmutableMap<UploadType, Class<? extends ItemReader<ProcessorInput>>> MAP_READER = ImmutableMap
+			.<UploadType, Class<? extends ItemReader<ProcessorInput>>>builder()
+			.put(UploadType.EXERCISE, ExerciseUploadReader.class).build();
+	
+	private static final ImmutableMap<UploadType, Class<? extends ItemProcessor<ProcessorInput, ProcessorOutput>>> MAP_PROCESSOR = ImmutableMap
+			.<UploadType, Class<? extends ItemProcessor<ProcessorInput, ProcessorOutput>>>builder()
+			.put(UploadType.EXERCISE, ExerciseUploadProcessor.class).build();
+
+	
+	private static final ImmutableMap<UploadType, Class<? extends ItemWriter<ProcessorOutput>>> MAP_WRITER = ImmutableMap
+			.<UploadType, Class<? extends ItemWriter<ProcessorOutput>>>builder()
+			.put(UploadType.EXERCISE, ExcerciseUploadWriter.class).build();
+	
     @Autowired
     private JobBuilderFactory jobs;
 
     @Autowired
     private StepBuilderFactory steps;
 
+    @Autowired
+    private AnnotationConfigApplicationContext context;
+    
     @Value("input/record.csv")
     private Resource inputCsv;
 
     @Value("file:xml/output.xml")
     private Resource outputXml;
 
-    @Bean
-    public ItemReader<ProcessorInput> itemReader() {
-        return new CustomItemReader();
-    }
+	@Value("#{systemProperties['uploadType']}")
+	private UploadType uploadType;
 
-    @Bean
-    public ItemProcessor<ProcessorInput, ProcessorOutput> itemProcessor() {
-        return new CustomItemProcessor();
-    }
-
-    @Bean
-    public ItemWriter<ProcessorOutput> itemWriter(){
-        return new CustomItemWriter();
-    }
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		context.register(MAP_READER.get(uploadType));
+		context.register(MAP_PROCESSOR.get(uploadType));
+		context.register(MAP_WRITER.get(uploadType));
+	}
 
     @Bean
     protected Step step1(ItemReader<ProcessorInput> reader,
@@ -60,4 +76,5 @@ public class SpringBatchConfig {
     public Job job(@Qualifier("step1") Step step1) {
         return jobs.get("firstBatchJob").start(step1).build();
     }
+
 }

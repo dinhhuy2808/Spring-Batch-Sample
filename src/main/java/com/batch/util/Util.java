@@ -1,14 +1,18 @@
 package com.batch.util;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.lang.reflect.Type;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
@@ -104,8 +108,10 @@ public class Util {
 		FileOutputStream outputStream;
 		try {
 			outputStream = new FileOutputStream(fileDestination);
-			byte[] strToBytes = output.getBytes();
-			outputStream.write(strToBytes);
+			Writer w = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
+			w.write(output);
+			w.flush();
+			w.close();
 
 			outputStream.close();
 		} catch (IOException e) {
@@ -137,7 +143,7 @@ public class Util {
 		} catch (Exception e) {
 			return Arrays.asList();
 		}
-		
+
 	}
 
 	public List<String> getAllCompleteFilesPathInFolder(String path) {
@@ -147,7 +153,7 @@ public class Util {
 		} catch (Exception e) {
 			return Arrays.asList();
 		}
-		
+
 	}
 
 	public String getCompleteNameInFolder(String pathFolder, String endWith, String startWith) {
@@ -160,17 +166,17 @@ public class Util {
 		} catch (NullPointerException | IndexOutOfBoundsException e) {
 			return "";
 		}
-		
+
 		return completeName;
 	}
 
 	public void deleteFile(String path) {
-		File myObj = new File(path); 
-	    if (myObj.delete()) { 
-	      System.out.println("Deleted the file: " + myObj.getName());
-	    } else {
-	      System.out.println("Failed to delete the file.");
-	    } 
+		File myObj = new File(path);
+		if (myObj.delete()) {
+			System.out.println("Deleted the file: " + myObj.getName());
+		} else {
+			System.out.println("Failed to delete the file.");
+		}
 
 	}
 }

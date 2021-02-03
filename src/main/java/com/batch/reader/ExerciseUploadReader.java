@@ -18,11 +18,12 @@ import org.springframework.beans.factory.annotation.Value;
 
 import com.batch.constant.QuestionType;
 import com.batch.dao.ResultDao;
+import com.batch.model.ExerciseUploadProcessorInput;
 import com.batch.model.ProcessorInput;
 import com.batch.service.SendEmail;
 import com.batch.util.Util;
 
-public class CustomItemReader implements ItemReader<ProcessorInput> {
+public class ExerciseUploadReader implements ItemReader<ProcessorInput> {
 
 	private Iterator<Sheet> sheetsIterator;
 	private Iterator<String> files;
@@ -30,7 +31,7 @@ public class CustomItemReader implements ItemReader<ProcessorInput> {
 	private String hsk = "";
 	private String file = "";
 	
-	@Value("${uploadFolder}")
+	@Value("${uploadExerciseFolder}")
 	private String uploadFolder;
 
 	@Value("#{systemProperties['spring.profiles.active']}")
@@ -46,7 +47,7 @@ public class CustomItemReader implements ItemReader<ProcessorInput> {
 	private SendEmail sendEmail;
 
 	@Override
-	public ProcessorInput read() throws Exception {
+	public ExerciseUploadProcessorInput read() throws Exception {
 		if (files == null) {
 			files = util.getAllCompleteFilesPathInFolder(uploadFolder).iterator();
 			filesName = util.getAllFilesNameInFolder(uploadFolder);
@@ -61,7 +62,7 @@ public class CustomItemReader implements ItemReader<ProcessorInput> {
 			
 		}
 		
-		ProcessorInput processorInput = readNextSheet(Integer.parseInt(hsk));
+		ExerciseUploadProcessorInput processorInput = readNextSheet(Integer.parseInt(hsk));
 		if (processorInput == null) {
 			file = readNextFile();
 			if (file == null) {
@@ -87,9 +88,9 @@ public class CustomItemReader implements ItemReader<ProcessorInput> {
 		resultDao.delete(Integer.parseInt(hsk), QuestionType.QUIZ);
 	}
 	
-	private ProcessorInput readNextSheet(int hsk) {
+	private ExerciseUploadProcessorInput readNextSheet(int hsk) {
 		if (sheetsIterator.hasNext()) {
-			ProcessorInput input = new ProcessorInput();
+			ExerciseUploadProcessorInput input = new ExerciseUploadProcessorInput();
 			input.setHsk(hsk);
 			input.setSheet(sheetsIterator.next());
 			return input;
