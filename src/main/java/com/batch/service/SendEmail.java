@@ -33,7 +33,7 @@ public class SendEmail {
 	@Value("${appPassword}")
 	private String appPassword;
 
-	public void sendEmail(String content) throws AddressException, MessagingException {
+	public void sendEmail(String content, String subject) throws AddressException, MessagingException {
 		Properties prop = new Properties();
 		prop.put("mail.smtp.auth", true);
 		prop.put("mail.smtp.starttls.enable", "true");
@@ -44,7 +44,7 @@ public class SendEmail {
 		Message message = new MimeMessage(session);
 		message.setFrom(new InternetAddress(hostEmail));
 		message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(adminEmail));
-		message.setSubject("Upload Successfully");
+		message.setSubject(subject);
 
 		String msg = content;
 

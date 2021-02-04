@@ -4,34 +4,33 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
 import javax.mail.MessagingException;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-import com.batch.constant.QuestionType;
-import com.batch.dao.ResultDao;
-import com.batch.model.ExerciseUploadProcessorInput;
+import com.batch.model.DictionaryUploadProcessorInput;
 import com.batch.model.ProcessorInput;
+import com.batch.model.SyncDictionaryUploadProcessorInput;
 import com.batch.service.SendEmail;
 import com.batch.util.Util;
 
-public class ExerciseUploadReader implements ItemReader<ProcessorInput> {
+public class SyncDictionaryUploadReader implements ItemReader<ProcessorInput> {
 
-	private Iterator<Sheet> sheetsIterator;
+	private Iterator<XSSFSheet> sheetsIterator;
 	private Iterator<String> files;
 	private List<String> filesName;
-	private String hsk = "";
 	private String file = "";
 	
-	@Value("${uploadExerciseFolder}")
+	@Value("${uploadDictionaryFolder}")
 	private String uploadFolder;
 
 	@Value("#{systemProperties['spring.profiles.active']}")
@@ -41,13 +40,10 @@ public class ExerciseUploadReader implements ItemReader<ProcessorInput> {
 	private Util util;
 
 	@Autowired
-	private ResultDao resultDao;
-
-	@Autowired
 	private SendEmail sendEmail;
 
 	@Override
-	public ExerciseUploadProcessorInput read() throws Exception {
+	public SyncDictionaryUploadProcessorInput read() throws Exception {
 		if (files == null) {
 			files = util.getAllCompleteFilesPathInFolder(uploadFolder).iterator();
 			filesName = util.getAllFilesNameInFolder(uploadFolder);
@@ -58,41 +54,33 @@ public class ExerciseUploadReader implements ItemReader<ProcessorInput> {
 			if (file == null) {
 				return null;
 			}
-			readALlfile();
+			readAllfile();
 			
 		}
 		
-		ExerciseUploadProcessorInput processorInput = readNextSheet(Integer.parseInt(hsk));
+		SyncDictionaryUploadProcessorInput processorInput = readNextSheet();
 		if (processorInput == null) {
 			file = readNextFile();
 			if (file == null) {
 				return null;
 			}
-			readALlfile();
-			processorInput = readNextSheet(Integer.parseInt(hsk));
+			readAllfile();
+			processorInput = readNextSheet();
 		}
 		return processorInput;
 	}
 	
-	private void readALlfile() throws IOException {
+	private void readAllfile() throws IOException {
 		InputStream inputStream = new FileInputStream(new File(file));
 		XSSFWorkbook workbook = new XSSFWorkbook(inputStream);
-		sheetsIterator = workbook.sheetIterator();
-		sheetsIterator.next();//skip first sheet
-		if (env.equalsIgnoreCase("production")) {
-			hsk = file.substring(file.lastIndexOf("/")+1, file.length()).split("\\.")[0];
-		} else {
-			hsk = file.substring(file.lastIndexOf("\\")+1, file.length()).split("\\.")[0];
-		}
-		
-		resultDao.delete(Integer.parseInt(hsk), QuestionType.QUIZ);
+		sheetsIterator = Arrays.asList(workbook.getSheetAt(0), workbook.getSheetAt(1)).iterator();
 	}
 	
-	private ExerciseUploadProcessorInput readNextSheet(int hsk) {
+	private SyncDictionaryUploadProcessorInput readNextSheet() {
 		if (sheetsIterator.hasNext()) {
-			ExerciseUploadProcessorInput input = new ExerciseUploadProcessorInput();
-			input.setHsk(hsk);
-			input.setSheet(sheetsIterator.next());
+			SyncDictionaryUploadProcessorInput input = new SyncDictionaryUploadProcessorInput();
+			input.setSheet1(sheetsIterator.next());
+			input.setSheet2(sheetsIterator.next());
 			return input;
 		} else {
 			sheetsIterator = null;
@@ -106,8 +94,7 @@ public class ExerciseUploadReader implements ItemReader<ProcessorInput> {
 			return files.next();
 		}
 		try {
-			sendEmail.sendEmail("Upload file for hsk: "
-					+ StringUtils.join(filesName, " ") + " successfully !!!", "Upload successfully");
+			sendEmail.sendEmail("Sync dictionary successfully !!!", "Upload successfully");
 		} catch (MessagingException e) {
 			e.printStackTrace();
 		}

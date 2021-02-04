@@ -192,7 +192,8 @@ public class ExerciseUploadProcessor implements ItemProcessor<ProcessorInput, Pr
 					Map<String, String> values = new HashMap<String, String>();
 					QuestionBody questionBody = new QuestionBody();
 					questionBody.setNumber(String.valueOf(Double.valueOf(sheet.getRow(startRow - 1).getCell(5).getNumericCellValue()).intValue()));
-					questionBody.setHeader(sheet.getRow(startRow - 1).getCell(6).toString()
+					String headerTemplate = "<div class='type2-listen-question-header'>%s</div>";
+					questionBody.setHeader(String.format(headerTemplate, sheet.getRow(startRow - 1).getCell(6).toString())
 							+ generateAudioHtmlBy(sheet.getRow(startRow - 1).getCell(10), hsk,
 									Integer.parseInt(sheet.getSheetName().trim())));
 					if (questionType.equals("NGHE")) {
@@ -222,7 +223,7 @@ public class ExerciseUploadProcessor implements ItemProcessor<ProcessorInput, Pr
 					questionDescription.setHeader(sheet.getRow(mergedRow.getFirstRow() - 1).getCell(4).toString());
 				} else if (questionType.equals("NGHE")) {
 					questionDescription
-							.setHeader(generateAudioHtmlBy(sheet.getRow(mergedRow.getFirstRow() - 1).getCell(10), hsk,
+							.setHeader(generateAudioHtmlBy(sheet.getRow(mergedRow.getFirstRow() - 1).getCell(11), hsk,
 									Integer.parseInt(sheet.getSheetName().trim())));
 				}
 				questionDescription.setBody(bodies);

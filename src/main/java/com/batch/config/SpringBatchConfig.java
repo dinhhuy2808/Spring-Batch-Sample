@@ -1,7 +1,5 @@
 package com.batch.config;
 
-import java.util.Map;
-
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
@@ -20,24 +18,39 @@ import org.springframework.core.io.Resource;
 import com.batch.model.ProcessorInput;
 import com.batch.model.ProcessorOutput;
 import com.batch.model.UploadType;
+import com.batch.processor.DictionaryUploadProcessor;
 import com.batch.processor.ExerciseUploadProcessor;
+import com.batch.processor.SyncDictionaryUploadProcessor;
+import com.batch.reader.DictionaryUploadReader;
 import com.batch.reader.ExerciseUploadReader;
+import com.batch.reader.SyncDictionaryUploadReader;
+import com.batch.writer.DictionaryUploadWriter;
 import com.batch.writer.ExcerciseUploadWriter;
+import com.batch.writer.SyncDictionaryUploadWriter;
 import com.google.common.collect.ImmutableMap;
 
 public class SpringBatchConfig implements InitializingBean {
 	private static final ImmutableMap<UploadType, Class<? extends ItemReader<ProcessorInput>>> MAP_READER = ImmutableMap
 			.<UploadType, Class<? extends ItemReader<ProcessorInput>>>builder()
-			.put(UploadType.EXERCISE, ExerciseUploadReader.class).build();
+			.put(UploadType.EXERCISE, ExerciseUploadReader.class)
+			.put(UploadType.DICTIONARY, DictionaryUploadReader.class)
+			.put(UploadType.SYNC_DICTIONARY, SyncDictionaryUploadReader.class)
+			.build();
 	
 	private static final ImmutableMap<UploadType, Class<? extends ItemProcessor<ProcessorInput, ProcessorOutput>>> MAP_PROCESSOR = ImmutableMap
 			.<UploadType, Class<? extends ItemProcessor<ProcessorInput, ProcessorOutput>>>builder()
-			.put(UploadType.EXERCISE, ExerciseUploadProcessor.class).build();
+			.put(UploadType.EXERCISE, ExerciseUploadProcessor.class)
+			.put(UploadType.DICTIONARY, DictionaryUploadProcessor.class)
+			.put(UploadType.SYNC_DICTIONARY, SyncDictionaryUploadProcessor.class)
+			.build();
 
 	
 	private static final ImmutableMap<UploadType, Class<? extends ItemWriter<ProcessorOutput>>> MAP_WRITER = ImmutableMap
 			.<UploadType, Class<? extends ItemWriter<ProcessorOutput>>>builder()
-			.put(UploadType.EXERCISE, ExcerciseUploadWriter.class).build();
+			.put(UploadType.EXERCISE, ExcerciseUploadWriter.class)
+			.put(UploadType.DICTIONARY, DictionaryUploadWriter.class)
+			.put(UploadType.SYNC_DICTIONARY, SyncDictionaryUploadWriter.class)
+			.build();
 	
     @Autowired
     private JobBuilderFactory jobs;
