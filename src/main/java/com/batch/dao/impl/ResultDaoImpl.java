@@ -32,6 +32,7 @@ public class ResultDaoImpl implements ResultDao {
 			"(hsk, test, `number`, answer, `type`, part) " + 
 			"VALUES(?, ?, ?, ?, ?, ?)";
 
+	private static final String UPDATE_TESTS_PROMOTESETTING = "update promotesetting set tests = ? where hsk = ?";
 	@Override
 	public void delete(int hsk, QuestionType questionType) {
 		jdbcTemplate.update(DELETE_RESULT, hsk, questionType.name());
@@ -61,5 +62,10 @@ public class ResultDaoImpl implements ResultDao {
 				throw new Exception("Error While Inserting");
 			}
 		}
+	}
+
+	@Override
+	public void updateTotalTests(int hsk, int totalTests) {
+		jdbcTemplate.update(UPDATE_TESTS_PROMOTESETTING, totalTests, hsk);
 	}
 }

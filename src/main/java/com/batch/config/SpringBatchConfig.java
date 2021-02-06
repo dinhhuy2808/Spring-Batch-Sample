@@ -21,12 +21,15 @@ import com.batch.model.UploadType;
 import com.batch.processor.DictionaryUploadProcessor;
 import com.batch.processor.ExerciseUploadProcessor;
 import com.batch.processor.SyncDictionaryUploadProcessor;
+import com.batch.processor.TestUploadProcessor;
 import com.batch.reader.DictionaryUploadReader;
 import com.batch.reader.ExerciseUploadReader;
 import com.batch.reader.SyncDictionaryUploadReader;
+import com.batch.reader.TestUploadReader;
 import com.batch.writer.DictionaryUploadWriter;
 import com.batch.writer.ExcerciseUploadWriter;
 import com.batch.writer.SyncDictionaryUploadWriter;
+import com.batch.writer.TestUploadWriter;
 import com.google.common.collect.ImmutableMap;
 
 public class SpringBatchConfig implements InitializingBean {
@@ -35,6 +38,7 @@ public class SpringBatchConfig implements InitializingBean {
 			.put(UploadType.EXERCISE, ExerciseUploadReader.class)
 			.put(UploadType.DICTIONARY, DictionaryUploadReader.class)
 			.put(UploadType.SYNC_DICTIONARY, SyncDictionaryUploadReader.class)
+			.put(UploadType.TEST, TestUploadReader.class)
 			.build();
 	
 	private static final ImmutableMap<UploadType, Class<? extends ItemProcessor<ProcessorInput, ProcessorOutput>>> MAP_PROCESSOR = ImmutableMap
@@ -42,6 +46,7 @@ public class SpringBatchConfig implements InitializingBean {
 			.put(UploadType.EXERCISE, ExerciseUploadProcessor.class)
 			.put(UploadType.DICTIONARY, DictionaryUploadProcessor.class)
 			.put(UploadType.SYNC_DICTIONARY, SyncDictionaryUploadProcessor.class)
+			.put(UploadType.TEST, TestUploadProcessor.class)
 			.build();
 
 	
@@ -50,6 +55,7 @@ public class SpringBatchConfig implements InitializingBean {
 			.put(UploadType.EXERCISE, ExcerciseUploadWriter.class)
 			.put(UploadType.DICTIONARY, DictionaryUploadWriter.class)
 			.put(UploadType.SYNC_DICTIONARY, SyncDictionaryUploadWriter.class)
+			.put(UploadType.TEST, TestUploadWriter.class)
 			.build();
 	
     @Autowired

@@ -36,7 +36,7 @@ import com.batch.model.Result;
 import com.batch.util.Util;
 import com.google.common.collect.ImmutableMap;
 
-public class ExerciseUploadProcessor implements ItemProcessor<ProcessorInput, ProcessorOutput> {
+public class TestUploadProcessor implements ItemProcessor<ProcessorInput, ProcessorOutput> {
 	
 	@Autowired
 	private Util util;
@@ -44,10 +44,10 @@ public class ExerciseUploadProcessor implements ItemProcessor<ProcessorInput, Pr
 	@Value("${publicImagePath}")
 	private String publicImagePath;
 	
-	@Value("${imageExercisePath}")
+	@Value("${imageTestPath}")
 	private String imageExercisePath;
 	
-	@Value("${audioExercisePath}")
+	@Value("${audioTestPath}")
 	private String audioExercisePath;
 
 	@Value("${documentRootPath}")
@@ -174,7 +174,7 @@ public class ExerciseUploadProcessor implements ItemProcessor<ProcessorInput, Pr
 				if (questionDescription.getNumber() != null && StringUtils.isNumeric(questionDescription.getNumber())) {
 					Result newResult = new Result();
 					newResult.setHsk(Integer.parseInt(hsk));
-					newResult.setType(QuestionType.QUIZ.name());
+					newResult.setType(QuestionType.TEST.name());
 					newResult.setTest(Integer.parseInt(sheet.getSheetName().trim()));
 					newResult.setNumber(Integer.parseInt(questionDescription.getNumber()));
 					newResult.setAnswer(sheet.getRow(mergedRow.getFirstRow() - 1).getCell(9).toString());
@@ -210,7 +210,7 @@ public class ExerciseUploadProcessor implements ItemProcessor<ProcessorInput, Pr
 					if (questionBody.getNumber() != null && StringUtils.isNumeric(questionBody.getNumber())) {
 						Result newResult = new Result();
 						newResult.setHsk(Integer.parseInt(hsk));
-						newResult.setType(QuestionType.QUIZ.name());
+						newResult.setType(QuestionType.TEST.name());
 						newResult.setTest(Integer.parseInt(sheet.getSheetName().trim()));
 						newResult.setNumber(Integer.parseInt(questionBody.getNumber()));
 						newResult.setAnswer(sheet.getRow(startRow - 1).getCell(9).toString());
@@ -235,7 +235,11 @@ public class ExerciseUploadProcessor implements ItemProcessor<ProcessorInput, Pr
 				questionBody.setNumber(String.valueOf(Double.valueOf(sheet.getRow(mergedRow.getFirstRow() - 1).getCell(5).getNumericCellValue()).intValue()));
 				Map<String, String> values = new HashMap<String, String>();
 				for (int index = mergedRow.getFirstRow() - 1; index <= mergedRow.getLastRow() - 1; index++) {
-					values.put(sheet.getRow(index).getCell(7).toString(), sheet.getRow(index).getCell(8).toString());
+					String imageTemp = "<div class=\"field-image\"> " + " <img style=\"max-width: 100%;\" src=\"!image_source!\" alt=\"\"> "
+							+ "</div> ";
+					String value = sheet.getRow(index).getCell(8).toString();
+					values.put(sheet.getRow(index).getCell(7).toString(),
+							generateImageHtmlBy(value, hsk, Integer.parseInt(sheet.getSheetName().trim()), imageTemp));
 				}
 				String header = TYPE_1_TEMPLATE;
 				String questionType = sheet.getRow(mergedRow.getFirstRow() - 1).getCell(0).getStringCellValue();
@@ -281,7 +285,7 @@ public class ExerciseUploadProcessor implements ItemProcessor<ProcessorInput, Pr
 				if (questionDescription.getNumber() != null && StringUtils.isNumeric(questionDescription.getNumber())) {
 					Result newResult = new Result();
 					newResult.setHsk(Integer.parseInt(hsk));
-					newResult.setType(QuestionType.QUIZ.name());
+					newResult.setType(QuestionType.TEST.name());
 					newResult.setTest(Integer.parseInt(sheet.getSheetName().trim()));
 					newResult.setNumber(Integer.parseInt(questionDescription.getNumber()));
 					newResult.setAnswer(sheet.getRow(mergedRow.getFirstRow() - 1).getCell(9).toString());
@@ -305,7 +309,7 @@ public class ExerciseUploadProcessor implements ItemProcessor<ProcessorInput, Pr
 				if (questionDescription.getNumber() != null && StringUtils.isNumeric(questionDescription.getNumber())) {
 					Result newResult = new Result();
 					newResult.setHsk(Integer.parseInt(hsk));
-					newResult.setType(QuestionType.QUIZ.name());
+					newResult.setType(QuestionType.TEST.name());
 					newResult.setTest(Integer.parseInt(sheet.getSheetName().trim()));
 					newResult.setNumber(Integer.parseInt(questionDescription.getNumber()));
 					char[] answer = sheet.getRow(mergedRow.getFirstRow() - 1).getCell(9).toString().trim()
@@ -358,7 +362,7 @@ public class ExerciseUploadProcessor implements ItemProcessor<ProcessorInput, Pr
 					if (questionBody.getNumber() != null && StringUtils.isNumeric(questionBody.getNumber())) {
 						Result newResult = new Result();
 						newResult.setHsk(Integer.parseInt(hsk));
-						newResult.setType(QuestionType.QUIZ.name());
+						newResult.setType(QuestionType.TEST.name());
 						newResult.setTest(Integer.parseInt(sheet.getSheetName().trim()));
 						newResult.setNumber(Integer.parseInt(questionBody.getNumber()));
 						newResult.setAnswer(sheet.getRow(index).getCell(9).getStringCellValue());
@@ -381,7 +385,7 @@ public class ExerciseUploadProcessor implements ItemProcessor<ProcessorInput, Pr
 					if (number != null) {
 						Result newResult = new Result();
 						newResult.setHsk(Integer.parseInt(hsk));
-						newResult.setType(QuestionType.QUIZ.name());
+						newResult.setType(QuestionType.TEST.name());
 						newResult.setTest(Integer.parseInt(sheet.getSheetName().trim()));
 						newResult.setNumber(number.intValue());
 						newResult.setAnswer(sheet.getRow(index).getCell(9).toString());
@@ -425,7 +429,7 @@ public class ExerciseUploadProcessor implements ItemProcessor<ProcessorInput, Pr
 	private String generateImageHtmlBy(String imageName, String hsk, int lesson, String template) {
 		String result = imageName;
 		try {
-			List<String> fileNames = util.getAllFilesNameInFolder(publicImagePath + "BT/" + hsk);
+			List<String> fileNames = util.getAllFilesNameInFolder(publicImagePath + "Test/" + hsk);
 			for (String fileName : fileNames) {
 				if (fileName.substring(0, fileName.lastIndexOf(".")).trim().equalsIgnoreCase(imageName.trim())) {
 					if (template.trim().equals("")) {
@@ -463,8 +467,8 @@ public class ExerciseUploadProcessor implements ItemProcessor<ProcessorInput, Pr
 		return cell != null && StringUtils.trimToNull(cell.toString()) != null
 				? audioTemp.replace("!audio_source!",
 						audioExercisePath.replace("{hsk}", hsk)
-								+ util.getCompleteNameInFolder(documentRootPath + "public/audios/BT/" + hsk,
-										cell.toString() + ".mp3", String.format("%02d", lesson)))
+								+ util.getCompleteNameInFolder(documentRootPath + "public/audios/Test/" + hsk,
+										cell.toString() + ".mp3", String.format("HSK%s-%02d",hsk, lesson)))
 				: "";
 	}
 

@@ -3,6 +3,7 @@ package com.batch.runner;
 import static com.batch.model.UploadType.DICTIONARY;
 import static com.batch.model.UploadType.SYNC_DICTIONARY;
 import static com.batch.model.UploadType.EXERCISE;
+import static com.batch.model.UploadType.TEST;
 
 import java.util.List;
 
@@ -33,12 +34,14 @@ public class App
 			.put(EXERCISE, "uploadExerciseLockFolder")
 			.put(DICTIONARY, "uploadDictionaryLockFolder")
 			.put(SYNC_DICTIONARY, "uploadDictionaryLockFolder")
+			.put(TEST, "uploadTestLockFolder")
 			.build();
 	
 	private static final ImmutableMap<UploadType, String> LOCK_FILE_ERROR = ImmutableMap.<UploadType, String>builder()
 			.put(EXERCISE, "There's another exercise upload process running, please wait until it's done.")
 			.put(DICTIONARY, "There's another dictionary upload process running, please wait until it's done.")
 			.put(SYNC_DICTIONARY, "There's another sync dictionary upload process running, please wait until it's done.")
+			.put(TEST, "There's another test upload process running, please wait until it's done.")
 			.build();
     public static void main(String[] args) {
         // Spring Java config

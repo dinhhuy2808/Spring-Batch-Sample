@@ -9,4 +9,5 @@ import com.batch.model.Result;
 public interface ResultDao {
 	 void delete(int hsk, QuestionType questionType);
 	 void insertResult(List<Result> results) throws Exception;
+	 void updateTotalTests(int hsk, int totalTests);
 }
