@@ -53,6 +53,8 @@ public class TestUploadReader implements ItemReader<ProcessorInput> {
 		if (files == null) {
 			files = util.getAllCompleteFilesPathInFolder(uploadFolder).iterator();
 			filesName = util.getAllFilesNameInFolder(uploadFolder);
+			System.out.println(uploadFolder);
+			System.out.println("total files: "+filesName.size());
 		}
 		
 		if (sheetsIterator == null) {
@@ -99,6 +101,7 @@ public class TestUploadReader implements ItemReader<ProcessorInput> {
 			return input;
 		} else {
 			sheetsIterator = null;
+			resultDao.updateTotalTests(Integer.valueOf(hsk), STATIC_TOTAL_TEST + totalTest);
 			util.deleteFile(file);
 			return null;
 		}
@@ -109,7 +112,6 @@ public class TestUploadReader implements ItemReader<ProcessorInput> {
 			return files.next();
 		}
 		try {
-			resultDao.updateTotalTests(Integer.valueOf(hsk), STATIC_TOTAL_TEST + totalTest);
 			sendEmail.sendEmail("Upload file for hsk: "
 					+ StringUtils.join(filesName, " ") + " successfully !!!", "Upload successfully");
 		} catch (MessagingException e) {
