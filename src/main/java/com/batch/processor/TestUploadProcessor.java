@@ -194,7 +194,7 @@ public class TestUploadProcessor implements ItemProcessor<ProcessorInput, Proces
 					questionBody.setNumber(String.valueOf(Double.valueOf(sheet.getRow(startRow - 1).getCell(5).getNumericCellValue()).intValue()));
 					String headerTemplate = "<div class='type2-listen-question-header'>%s</div>";
 					questionBody.setHeader(questionType.equals("DOC")
-							? String.format(headerTemplate, sheet.getRow(startRow - 1).getCell(6).toString())
+							? sheet.getRow(startRow - 1).getCell(6).toString()
 							: String.format(headerTemplate, sheet.getRow(startRow - 1).getCell(6).toString())
 									+ generateAudioHtmlBy(sheet.getRow(startRow - 1).getCell(10), hsk,
 											Integer.parseInt(sheet.getSheetName().trim())));

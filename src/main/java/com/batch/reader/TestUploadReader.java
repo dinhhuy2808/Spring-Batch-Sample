@@ -90,7 +90,7 @@ public class TestUploadReader implements ItemReader<ProcessorInput> {
 			hsk = file.substring(file.lastIndexOf("\\")+1, file.length()).split("\\.")[0];
 		}
 		
-		resultDao.delete(Integer.parseInt(hsk), QuestionType.QUIZ);
+		resultDao.delete(Integer.parseInt(hsk), QuestionType.TEST);
 	}
 	
 	private ExerciseUploadProcessorInput readNextSheet(int hsk) {
