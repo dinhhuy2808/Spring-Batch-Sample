@@ -321,7 +321,7 @@ public class ExerciseUploadProcessor implements ItemProcessor<ProcessorInput, Pr
 				for (int index = mergedRow.getFirstRow() - 1; index <= mergedRow.getLastRow() - 1; index++) {
 					QuestionBody questionBody = new QuestionBody();
 					questionBody.setNumber(String.valueOf(Double.valueOf(sheet.getRow(index).getCell(5).getNumericCellValue()).intValue()));
-					String subjectTemplate = "<div class=\"field-subject\"><p>!question_description!</p></div><div class=\"field-select\"></div>";
+					String subjectTemplate = "<div class=\"field-subject\"><div>!question_description!</div></div><div class=\"field-select\"></div>";
 					bodies.add(questionBody);
 					String questionType = sheet.getRow(mergedRow.getFirstRow() - 1).getCell(0).getStringCellValue();
 					
