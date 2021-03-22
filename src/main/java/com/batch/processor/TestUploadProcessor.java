@@ -199,7 +199,7 @@ public class TestUploadProcessor implements ItemProcessor<ProcessorInput, Proces
 									+ generateAudioHtmlBy(sheet.getRow(startRow - 1).getCell(10), hsk,
 											Integer.parseInt(sheet.getSheetName().trim())));
 					if (questionType.equals("NGHE")) {
-						questionBody.setListenContent(sheet.getRow(startRow - 1).getCell(4).getStringCellValue());
+						questionBody.setListenContent(sheet.getRow(startRow - 1).getCell(4).getStringCellValue().replace("\n", "</br>"));
 					}
 					for (int index = startRow - 1; index <= chilQuiz.get(0).getLastRow() - 1; index++) {
 						values.put(sheet.getRow(index).getCell(7).toString(),
@@ -222,7 +222,7 @@ public class TestUploadProcessor implements ItemProcessor<ProcessorInput, Proces
 				questionDescription.setNumber(sheet.getRow(mergedRow.getFirstRow() - 1).getCell(3).toString());
 				String questionType = sheet.getRow(mergedRow.getFirstRow() - 1).getCell(0).getStringCellValue();
 				if (questionType.equals("DOC")) {
-					questionDescription.setHeader(sheet.getRow(mergedRow.getFirstRow() - 1).getCell(4).toString());
+					questionDescription.setHeader(sheet.getRow(mergedRow.getFirstRow() - 1).getCell(4).toString().replace("\n", "</br>"));
 				} else if (questionType.equals("NGHE")) {
 					questionDescription
 							.setHeader(generateAudioHtmlBy(sheet.getRow(mergedRow.getFirstRow() - 1).getCell(11), hsk,
@@ -252,13 +252,13 @@ public class TestUploadProcessor implements ItemProcessor<ProcessorInput, Proces
 							.replace(AUDIO_TEMP, generateAudioHtmlBy(sheet.getRow(mergedRow.getFirstRow() - 1).getCell(10),
 									hsk, Integer.parseInt(sheet.getSheetName().trim())));
 					questionDescription.setListenContent(sheet.getRow(mergedRow.getFirstRow() - 1).getCell(4).getStringCellValue() != null
-											? sheet.getRow(mergedRow.getFirstRow() - 1).getCell(4).getStringCellValue()
+											? sheet.getRow(mergedRow.getFirstRow() - 1).getCell(4).getStringCellValue().replace("\n", "</br>")
 											: "");
 				} else if (questionType.equals("DOC")) {
 					header = header
 							.replace(QUESTION_DESCRIPTION_TEMP,
 									sheet.getRow(mergedRow.getFirstRow() - 1).getCell(4).getStringCellValue() != null
-											? sheet.getRow(mergedRow.getFirstRow() - 1).getCell(4).getStringCellValue()
+											? sheet.getRow(mergedRow.getFirstRow() - 1).getCell(4).getStringCellValue().replace("\n", "</br>")
 											: "")
 							.replace(AUDIO_TEMP, generateAudioHtmlBy(sheet.getRow(mergedRow.getFirstRow() - 1).getCell(10),
 									hsk, Integer.parseInt(sheet.getSheetName().trim())));
@@ -344,7 +344,7 @@ public class TestUploadProcessor implements ItemProcessor<ProcessorInput, Proces
 							questionBody.setListenContent(sheet.getRow(index).getCell(4).getStringCellValue());
 						} else {
 							questionBody.setHeader(subjectTemplate.replace("!question_description!",
-									sheet.getRow(index).getCell(4).toString()));
+									sheet.getRow(index).getCell(4).toString().replace("\n", "</br>")));
 							values.put(answerNames[countAnswer], imageHtml + audiotemplate);
 						}
 						
