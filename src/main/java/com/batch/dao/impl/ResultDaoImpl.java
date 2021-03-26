@@ -27,6 +27,9 @@ public class ResultDaoImpl implements ResultDao {
 	private static final String DELETE_RESULT =
 			"delete from result where hsk = ? and type = ?";
 	
+	private static final String DELETE_RESULT_TEST =
+			"delete from result where hsk = ? and type = ? and test>10";
+
 	private static final String INSERT_RESULT = 
 			"INSERT INTO `result` " + 
 			"(hsk, test, `number`, answer, `type`, part) " + 
@@ -35,7 +38,12 @@ public class ResultDaoImpl implements ResultDao {
 	private static final String UPDATE_TESTS_PROMOTESETTING = "update promotesetting set tests = ? where hsk = ?";
 	@Override
 	public void delete(int hsk, QuestionType questionType) {
-		jdbcTemplate.update(DELETE_RESULT, hsk, questionType.name());
+		if (questionType.equals(QuestionType.TEST)) {
+			jdbcTemplate.update(DELETE_RESULT_TEST, hsk, questionType.name());
+		} else {
+			jdbcTemplate.update(DELETE_RESULT, hsk, questionType.name());
+		}
+		
 	}
 
 	@Override
