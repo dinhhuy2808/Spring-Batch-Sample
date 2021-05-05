@@ -112,7 +112,7 @@ public class TestUploadReader implements ItemReader<ProcessorInput> {
 			return files.next();
 		}
 		try {
-			sendEmail.sendEmail("Upload file for hsk: "
+			sendEmail.sendEmail("Upload test file for hsk: "
 					+ StringUtils.join(filesName, " ") + " successfully !!!", "Upload successfully");
 		} catch (MessagingException e) {
 			e.printStackTrace();
