@@ -6,6 +6,7 @@ import java.util.List;
 public class ExerciseUploadProcessorOutput extends ProcessorOutput {
 	private List<Result> results;
 	private List<QuestionDescription> questionDescriptions;
+	private List<RawQuestionDescription> rawQuestionDescriptions;
 	private String hsk;
 	private String name;
 	public List<Result> getResults() {
@@ -31,5 +32,11 @@ public class ExerciseUploadProcessorOutput extends ProcessorOutput {
 	}
 	public void setName(String name) {
 		this.name = name;
+	}
+	public List<RawQuestionDescription> getRawQuestionDescriptions() {
+		return rawQuestionDescriptions;
+	}
+	public void setRawQuestionDescriptions(List<RawQuestionDescription> rawQuestionDescriptions) {
+		this.rawQuestionDescriptions = rawQuestionDescriptions;
 	}
 }

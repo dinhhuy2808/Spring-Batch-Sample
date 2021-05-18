@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -25,6 +26,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 import com.batch.constant.Category;
 import com.batch.constant.QuestionType;
+import com.batch.model.Details;
 import com.batch.model.ExerciseUploadProcessorInput;
 import com.batch.model.ExerciseUploadProcessorOutput;
 import com.batch.model.MergedRow;
@@ -32,6 +34,8 @@ import com.batch.model.ProcessorInput;
 import com.batch.model.ProcessorOutput;
 import com.batch.model.QuestionBody;
 import com.batch.model.QuestionDescription;
+import com.batch.model.RawQuestionBody;
+import com.batch.model.RawQuestionDescription;
 import com.batch.model.Result;
 import com.batch.util.Util;
 import com.google.common.collect.ImmutableMap;
@@ -103,12 +107,14 @@ public class TestUploadProcessor implements ItemProcessor<ProcessorInput, Proces
 				.collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue(), (e1, e2) -> e2,
 						LinkedHashMap::new));
 		List<QuestionDescription> questionDescriptions = new ArrayList<>();
+		List<RawQuestionDescription> rawQuestionDescriptions = new ArrayList<>();
 		List<Result> results = new ArrayList<Result>();
 		for (MergedRow key : childQuizMapFromMergedRow.keySet()) {
 			System.out.println("key: " + key);
 			System.out.println(childQuizMapFromMergedRow.get(key));
 			System.out.println(sheet.getSheetName().trim());
 			questionDescriptions.add(getQuiz(key, childQuizMapFromMergedRow.get(key), sheet, String.valueOf(exerciseUploadProcessorInput.getHsk()), results));
+			rawQuestionDescriptions.add(getRawQuiz(questionDescriptions.get(questionDescriptions.size()-1)));
 			String number = sheet.getRow(key.getFirstRow() - 1).getCell(5).toString();
 			if (!StringUtils.isEmpty(number) && !StringUtils.isAlphanumericSpace(number)) {
 			}
@@ -119,6 +125,7 @@ public class TestUploadProcessor implements ItemProcessor<ProcessorInput, Proces
 		ExerciseUploadProcessorOutput output = new ExerciseUploadProcessorOutput();
 		output.setResults(results);
 		output.setQuestionDescriptions(questionDescriptions);
+		output.setRawQuestionDescriptions(rawQuestionDescriptions);
 		output.setHsk(String.valueOf(exerciseUploadProcessorInput.getHsk()));
 		output.setName(sheet.getSheetName());
         return output;
@@ -424,6 +431,145 @@ public class TestUploadProcessor implements ItemProcessor<ProcessorInput, Proces
 		questionDescription.setCategory(cat.equals("NGHE") ? Category.NGHE
 				: cat.equals("DOC") ? Category.DOC_HIEU : cat.equals("VIET") ? Category.VIET_VAN : Category.OTHERS);
 		return questionDescription;
+	}
+	
+
+	private RawQuestionDescription getRawQuiz(QuestionDescription questionDescription) {
+		RawQuestionDescription rawQuestionDescription = null;
+		QuestionDescription questionDescriptionTemp = null;
+		try {
+			questionDescriptionTemp = (QuestionDescription) questionDescription.clone();
+		} catch (CloneNotSupportedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		List<RawQuestionBody> rawBodies = new ArrayList<RawQuestionBody>();
+		String type = questionDescription.getType();
+		if (type.equalsIgnoreCase("1")) {
+			Details questionHeardetails = getRawHeaderDetail(questionDescription.getHeader());
+			Map<String, Details> values = new HashMap<String, Details>();
+			values.put("A", null);
+			values.put("B", null);
+			for (QuestionBody body : questionDescription.getBody()) {
+				RawQuestionBody rawBody = new RawQuestionBody(body.getNumber(), getRawHeaderDetail(body.getHeader()),
+						values, body.getListenContent());
+				rawBodies.add(rawBody);
+			}
+			rawQuestionDescription = new RawQuestionDescription(type, questionDescriptionTemp.getNumber(),
+					questionHeardetails, null, rawBodies, questionDescriptionTemp.getCategory(),
+					questionDescriptionTemp.getListenContent());
+
+		} else if (type.equalsIgnoreCase("2")) {
+			Details questionHeardetails = getRawHeaderDetail(questionDescription.getHeader());
+			Map<String, Details> values = new HashMap<String, Details>();
+			for (QuestionBody body : questionDescription.getBody()) {
+				for (Entry<String, String> bodyValue : body.getValue().entrySet()) {
+					values.put(bodyValue.getKey(), new Details(null, null, bodyValue.getValue()));
+				}
+				RawQuestionBody rawBody = new RawQuestionBody(body.getNumber(), getRawHeaderDetail(body.getHeader()),
+						values, body.getListenContent());
+				Document doc = Jsoup.parse(body.getHeader());
+				Elements eleDescriptions = doc.select(".type2-listen-question-header");
+				for (Element eleDescription : eleDescriptions) {
+					rawBody.getHeader().setDescription(eleDescription.text());
+				}
+				rawBodies.add(rawBody);
+			}
+			rawQuestionDescription = new RawQuestionDescription(type, questionDescriptionTemp.getNumber(),
+					questionHeardetails, null, rawBodies, questionDescriptionTemp.getCategory(),
+					questionDescriptionTemp.getListenContent());
+
+		} else if (type.equalsIgnoreCase("3")) {
+			Details questionHeardetails = getRawHeaderDetail(questionDescription.getHeader());
+			Map<String, Details> values = new HashMap<String, Details>();
+			for (QuestionBody body : questionDescription.getBody()) {
+				for (Entry<String, String> bodyValue : body.getValue().entrySet()) {
+					values.put(bodyValue.getKey(), new Details(null, null, bodyValue.getValue()));
+				}
+				RawQuestionBody rawBody = new RawQuestionBody(body.getNumber(), getRawHeaderDetail(body.getHeader()),
+						values, body.getListenContent());
+				rawBodies.add(rawBody);
+			}
+			rawQuestionDescription = new RawQuestionDescription(type, questionDescriptionTemp.getNumber(),
+					questionHeardetails, null, rawBodies, questionDescriptionTemp.getCategory(),
+					questionDescriptionTemp.getListenContent());
+
+		} else if (type.equalsIgnoreCase("4")) {
+			Details questionHeardetails = getRawHeaderDetail(questionDescription.getHeader());
+			Map<String, Details> values = new HashMap<String, Details>();
+			for (QuestionBody body : questionDescription.getBody()) {
+				for (Entry<String, String> bodyValue : body.getValue().entrySet()) {
+					values.put(bodyValue.getKey(), new Details(null, null, bodyValue.getValue()));
+				}
+				RawQuestionBody rawBody = new RawQuestionBody(body.getNumber(), getRawHeaderDetail(body.getHeader()),
+						values, body.getListenContent());
+				rawBodies.add(rawBody);
+			}
+			rawQuestionDescription = new RawQuestionDescription(type, questionDescriptionTemp.getNumber(),
+					questionHeardetails, null, rawBodies, questionDescriptionTemp.getCategory(),
+					questionDescriptionTemp.getListenContent());
+
+		} else if (type.equalsIgnoreCase("5")) {
+			Details questionHeardetails = getRawHeaderDetail(questionDescription.getHeader());
+			Map<String, Details> values = new HashMap<String, Details>();
+			for (Entry<String, String> bodyValue : questionDescriptionTemp.getHeadingOptions().entrySet()) {
+				values.put(bodyValue.getKey(), getRawHeaderDetail(bodyValue.getValue()));
+			}
+			for (QuestionBody body : questionDescription.getBody()) {
+				RawQuestionBody rawBody = new RawQuestionBody(body.getNumber(), getRawHeaderDetail(body.getHeader()),
+						null, body.getListenContent());
+				rawBodies.add(rawBody);
+			}
+			rawQuestionDescription = new RawQuestionDescription(type, questionDescriptionTemp.getNumber(),
+					questionHeardetails, values, rawBodies, questionDescriptionTemp.getCategory(),
+					questionDescriptionTemp.getListenContent().replace("</br>", "\n"));
+
+		} else if (type.equalsIgnoreCase("6")) {
+			Details questionHeardetails = getRawHeaderDetail(questionDescription.getHeader());
+			Map<String, Details> values = new HashMap<String, Details>();
+			for (QuestionBody body : questionDescription.getBody()) {
+				for (Entry<String, String> bodyValue : body.getValue().entrySet()) {
+					values.put(bodyValue.getKey(), new Details(null, null, bodyValue.getValue()));
+				}
+				RawQuestionBody rawBody = new RawQuestionBody(body.getNumber(), getRawHeaderDetail(body.getHeader()),
+						values, body.getListenContent());
+				rawBodies.add(rawBody);
+			}
+			rawQuestionDescription = new RawQuestionDescription(type, questionDescriptionTemp.getNumber(),
+					questionHeardetails, null, rawBodies, questionDescriptionTemp.getCategory(),
+					questionDescriptionTemp.getListenContent());
+
+		} else {
+			System.out.println("---------------------------------" + type);
+		}
+		return rawQuestionDescription;
+	}
+	
+	private Details getRawHeaderDetail(String html) {
+		if (html == null) {
+			return new Details(null, null, null);
+		}
+		Details details = new Details();
+		Document doc = Jsoup.parse(html);
+		Elements eleImages = doc.select("img");
+		for (Element eleImage : eleImages) {
+			String source = eleImage.attr("src");
+			if (!source.contains("undo.svg") && !source.contains("redo.svg")) {
+				details.setImage(eleImage.attr("src"));
+			}
+		}
+		Elements eleAudioSources = doc.select("audio>source");
+		for (Element eleAudioSource : eleAudioSources) {
+			details.setAudio(eleAudioSource.attr("src"));
+		}
+		Elements eleDescriptions = doc.select(".pinyin");
+		for (Element eleDescription : eleDescriptions) {
+			details.setDescription(eleDescription.text());
+		}
+		if (details.getDescription() == null || details.getDescription().isEmpty()) {
+			details.setDescription(doc.text());
+		}
+		return details;
 	}
 	
 	private String generateImageHtmlBy(String imageName, String hsk, int lesson, String template) {

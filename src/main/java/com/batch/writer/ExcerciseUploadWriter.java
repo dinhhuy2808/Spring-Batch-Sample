@@ -28,6 +28,8 @@ public class ExcerciseUploadWriter implements ItemWriter<ProcessorOutput> {
 		resultDao.insertResult(output.getResults());
 		util.writeToFile(util.objectToJSON(output.getQuestionDescriptions()),
 				lessonQuizPath + "/hsk-" + output.getHsk() + "-" + output.getName().trim() + ".json");
+		util.writeToFile(util.objectToJSON(output.getRawQuestionDescriptions()),
+				lessonQuizPath + "/raw-hsk-" + output.getHsk() + "-" + output.getName().trim() + ".json");
 	}
 
 }
