@@ -28,6 +28,8 @@ public class TestUploadWriter implements ItemWriter<ProcessorOutput> {
 		resultDao.insertResult(output.getResults());
 		util.writeToFile(util.objectToJSON(output.getQuestionDescriptions()),
 				testPath + "/test-" + output.getHsk() + "-" + output.getName().trim() + ".json");
+		util.writeToFile(util.objectToJSON(output.getRawQuestionDescriptions()),
+				testPath + "/raw-test-" + output.getHsk() + "-" + output.getName().trim() + ".json");
 	}
 
 }

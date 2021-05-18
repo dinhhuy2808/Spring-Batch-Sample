@@ -522,7 +522,9 @@ public class TestUploadProcessor implements ItemProcessor<ProcessorInput, Proces
 			}
 			rawQuestionDescription = new RawQuestionDescription(type, questionDescriptionTemp.getNumber(),
 					questionHeardetails, values, rawBodies, questionDescriptionTemp.getCategory(),
-					questionDescriptionTemp.getListenContent().replace("</br>", "\n"));
+					questionDescriptionTemp.getListenContent() != null
+					? questionDescriptionTemp.getListenContent().replace("</br>", "\n")
+					: "");
 
 		} else if (type.equalsIgnoreCase("6")) {
 			Details questionHeardetails = getRawHeaderDetail(questionDescription.getHeader());
@@ -567,7 +569,9 @@ public class TestUploadProcessor implements ItemProcessor<ProcessorInput, Proces
 			details.setDescription(eleDescription.text());
 		}
 		if (details.getDescription() == null || details.getDescription().isEmpty()) {
-			details.setDescription(doc.text());
+			if (!doc.text().contains("Your browser does not support the audio element.")) {
+				details.setDescription(doc.text());
+			}
 		}
 		return details;
 	}
