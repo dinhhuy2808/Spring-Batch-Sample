@@ -6,6 +6,7 @@ import java.util.Map;
 public class QuestionBody implements Cloneable{
 	String number;
 	String header;
+	String audioUrl;
 	Map<String, String> value = new HashMap<String, String>();
 	String listenContent;
 	@Override
@@ -35,6 +36,12 @@ public class QuestionBody implements Cloneable{
 	}
 	public void setListenContent(String listenContent) {
 		this.listenContent = listenContent;
+	}
+	public String getAudioUrl() {
+		return audioUrl;
+	}
+	public void setAudioUrl(String audioUrl) {
+		this.audioUrl = audioUrl;
 	}
 	
 }

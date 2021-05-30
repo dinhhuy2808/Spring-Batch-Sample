@@ -69,6 +69,7 @@ public class ExerciseUploadProcessor implements ItemProcessor<ProcessorInput, Pr
 	private static String ANSWER_DESCRIPTION_TEMP = "!answer_description!";
 	private static String FIELD_OPTION_TEMPMLATE = "<div class=\"field-option\"> <span class=\"field-no\">!answer_char!</span>\r\n"
 			+ "<p><span class=\"label-words\" data-wid=\"875\">!answer_description!</span></p>\r\n" + "</div>";
+	private int auditoIndex = 0;
 
 
     public ExerciseUploadProcessorOutput process(ProcessorInput processorInput) {
@@ -177,6 +178,7 @@ public class ExerciseUploadProcessor implements ItemProcessor<ProcessorInput, Pr
 				questionDescription.setType(type);
 				questionDescription.setNumber(String.valueOf(Double.valueOf(sheet.getRow(mergedRow.getFirstRow() - 1).getCell(5).getNumericCellValue()).intValue()));
 				questionDescription.setHeader(header);
+				questionDescription.setAudioUrl(generateAudioSource(header));
 				questionDescription.setBody(bodies);
 				if (questionDescription.getNumber() != null && StringUtils.isNumeric(questionDescription.getNumber())) {
 					Result newResult = new Result();
@@ -205,6 +207,7 @@ public class ExerciseUploadProcessor implements ItemProcessor<ProcessorInput, Pr
 							: String.format(headerTemplate, sheet.getRow(startRow - 1).getCell(6).toString())
 									+ generateAudioHtmlBy(sheet.getRow(startRow - 1).getCell(10), hsk,
 											Integer.parseInt(sheet.getSheetName().trim())));
+					questionBody.setAudioUrl(generateAudioSource(questionBody.getHeader()));
 					if (questionType.equals("NGHE")) {
 						questionBody.setListenContent(sheet.getRow(startRow - 1).getCell(4).getStringCellValue().replace("\n", "</br>"));
 					}
@@ -234,6 +237,7 @@ public class ExerciseUploadProcessor implements ItemProcessor<ProcessorInput, Pr
 					questionDescription
 							.setHeader(generateAudioHtmlBy(sheet.getRow(mergedRow.getFirstRow() - 1).getCell(11), hsk,
 									Integer.parseInt(sheet.getSheetName().trim())));
+					questionDescription.setAudioUrl(generateAudioSource(questionDescription.getHeader()));
 				}
 				questionDescription.setBody(bodies);
 
@@ -284,6 +288,7 @@ public class ExerciseUploadProcessor implements ItemProcessor<ProcessorInput, Pr
 				questionDescription.setType(type);
 				questionDescription.setNumber(String.valueOf(Double.valueOf(sheet.getRow(mergedRow.getFirstRow() - 1).getCell(5).getNumericCellValue()).intValue()));
 				questionDescription.setHeader(header);
+				questionDescription.setAudioUrl(generateAudioSource(questionDescription.getHeader()));
 				questionDescription.setBody(bodies);
 				if (questionDescription.getNumber() != null && StringUtils.isNumeric(questionDescription.getNumber())) {
 					Result newResult = new Result();
@@ -343,11 +348,13 @@ public class ExerciseUploadProcessor implements ItemProcessor<ProcessorInput, Pr
 								Integer.parseInt(sheet.getSheetName().trim()));
 						if (questionType.equals("NGHE")) {
 							questionBody.setHeader(audiotemplate);
+							questionBody.setAudioUrl(generateAudioSource(questionBody.getHeader()));
 							values.put(answerNames[countAnswer], imageHtml);
 							questionBody.setListenContent(sheet.getRow(index).getCell(4).getStringCellValue().replace("\n", "</br>"));
 						} else {
 							questionBody.setHeader(subjectTemplate.replace("!question_description!",
 									sheet.getRow(index).getCell(4).toString().replace("\n", "</br>")));
+							questionBody.setAudioUrl(generateAudioSource(questionBody.getHeader()));
 							values.put(answerNames[countAnswer], imageHtml + audiotemplate);
 						}
 						
@@ -605,20 +612,69 @@ public class ExerciseUploadProcessor implements ItemProcessor<ProcessorInput, Pr
 	
 	
 	private String generateAudioHtmlBy(Cell cell, String hsk, int lesson) {
-		
-		String audioTemp = "<audio controls=\"\" controlsList=\"nodownload\"> \r\n" + 
-				"  <source src=\"!audio_source!\" type=\"audio/mpeg\"> Your browser does not support the audio element. \r\n" + 
-				"</audio>\r\n" + 
-				"<div>\r\n" + 
-				"   <button class=\"btn\" ><img src=\"assets/images/numbers/undo.svg\" onclick=\"previous(this)\" alt=\"\"  width=\"30px\" height=\"30px\"></button>\r\n" + 
-				"   <button class=\"btn mr-4\" ><img src=\"assets/images/numbers/redo.svg\" onclick=\"next(this)\" alt=\"\" width=\"30px\" height=\"30px\"></button>\r\n" + 
-				"</div>";
+		StringBuilder audioTemp = new StringBuilder("<div class=\"Scriptcontent\">\r\n" + 
+				"	<div style=\"width: 50px;\"></div>\r\n" + 
+				"	<div class=\"audio-player\" id=\"audio-player"+(auditoIndex)+"\" style=\"margin: 0 auto\">\r\n" + 
+				"		<div class=\"timeline\">\r\n" + 
+				"			<div class=\"progress\"></div>\r\n" + 
+				"		</div>\r\n" + 
+				"		<div class=\"controls\">\r\n" + 
+				"			<div>\r\n" + 
+				"				<img class=\"time-skip\" id=\"timeBack\" onClick=\"Window.myComponent.playback("+(auditoIndex)+")\"\r\n" + 
+				"					src=\"assets/images/numbers/undo.svg\" alt=\"\">\r\n" + 
+				"			</div>\r\n" + 
+				"			<div class=\"play-container\" onClick=\"Window.myComponent.play("+(auditoIndex)+")\">\r\n" + 
+				"				<div class=\"toggle-play play\" id=\"playBtn\"></div>\r\n" + 
+				"			</div>\r\n" + 
+				"			<div>\r\n" + 
+				"				<img class=\"time-skip\" id=\"timeFoward\" onClick=\"Window.myComponent.foward("+(auditoIndex)+")\"\r\n" + 
+				"					src=\"assets/images/numbers/redo.svg\" alt=\"\">\r\n" + 
+				"			</div>\r\n" + 
+				"			<div class=\"time\">\r\n" + 
+				"				<div class=\"current\">0:00</div>\r\n" + 
+				"				<div class=\"divider\">/</div>\r\n" + 
+				"				<div class=\"length\"></div>\r\n" + 
+				"			</div>\r\n" + 
+				"			<div class=\"volume-container\">\r\n" + 
+				"				<div class=\"volume-button\" onClick=\"Window.myComponent.mute("+(auditoIndex)+")\">\r\n" + 
+				"					<div class=\"volume icono-volumeMedium\"></div>\r\n" + 
+				"				</div>\r\n" + 
+				"\r\n" + 
+				"				<div class=\"volume-slider\" onClick=\"Window.myComponent.changeVolumn("+(auditoIndex)+")\">\r\n" + 
+				"					<div class=\"volume-percentage\"></div>\r\n" + 
+				"				</div>\r\n" + 
+				"			</div>\r\n" + 
+				"		</div>\r\n" + 
+				"	</div>\r\n" + 
+				"	<!-- partial -->\r\n" + 
+				"	<div class=\"d-none\">"
+				+ "<audio id=\"audio"+(auditoIndex++)+"\" controls=\"\" controlslist=\"nodownload\">" + 
+				"  <source src=\"!audio_source!\" type=\"audio/mpeg\"> </audio>"
+				+ "</div>\r\n" + 
+				"</div>");
+//		String audioTemp = "<audio controls=\"\" controlsList=\"nodownload\"> \r\n" + 
+//				"  <source src=\"!audio_source!\" type=\"audio/mpeg\"> Your browser does not support the audio element. \r\n" + 
+//				"</audio>\r\n" + 
+//				"<div>\r\n" + 
+//				"   <button class=\"btn\" ><img src=\"assets/images/numbers/undo.svg\" onclick=\"previous(this)\" alt=\"\"  width=\"30px\" height=\"30px\"></button>\r\n" + 
+//				"   <button class=\"btn mr-4\" ><img src=\"assets/images/numbers/redo.svg\" onclick=\"next(this)\" alt=\"\" width=\"30px\" height=\"30px\"></button>\r\n" + 
+//				"</div>";
+//		audioTemp = "<audio-player [audioUrl]=\"!audio_source!\"></audio-player>";
 		return cell != null && StringUtils.trimToNull(cell.toString()) != null
-				? audioTemp.replace("!audio_source!",
+				? audioTemp.toString().replace("!audio_source!",
 						audioExercisePath.replace("{hsk}", hsk)
 								+ util.getCompleteNameInFolder(documentRootPath + "public/audios/BT/" + hsk,
 										cell.toString() + ".mp3", String.format("%02d", lesson)))
 				: "";
 	}
-
+	
+	private String generateAudioSource(String html) {
+		Document doc = Jsoup.parse(html);
+		Elements elements = doc.getElementsByTag("audio");
+		String source = "";
+		for(Element ele : elements) {
+			source = ele.getElementsByTag("source").get(0).attr("src");
+		}
+		return source;
+	}
 }

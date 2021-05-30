@@ -10,6 +10,7 @@ public class QuestionDescription implements Cloneable {
 	String type;
 	String number;
 	String header;
+	String audioUrl;
 	Map<String, String> headingOptions;
 	List<QuestionBody> body;
 	Category category;
@@ -59,6 +60,12 @@ public class QuestionDescription implements Cloneable {
 	}
 	public void setListenContent(String listenContent) {
 		this.listenContent = listenContent;
+	}
+	public String getAudioUrl() {
+		return audioUrl;
+	}
+	public void setAudioUrl(String audioUrl) {
+		this.audioUrl = audioUrl;
 	}
 	
 }
