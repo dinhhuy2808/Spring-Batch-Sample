@@ -1,0 +1,32 @@
+stages:
+  - test
+  - build jar
+  - build and push docker image
+  - deploy
+build:
+  image: maven:3.6.2-jdk-8-slim
+  stage: build jar
+  script:
+    - mvn clean install -Dspring.profiles.active=dev && mvn package -B -e -Dspring.profiles.active=dev
+  artifacts:
+    paths:
+      - target/*.jar
+  only:
+    - master
+deploy:
+  stage: deploy
+  image: node:latest
+  script:
+    - apt-get update
+    - apt-get install -y -qq sshpass
+    - 'which ssh-agent || ( apt-get install -qq openssh-client )'
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$SSH_PRIVATE_KEY")
+    - mkdir -p ~/.ssh
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+    - ssh-keyscan qchinese.net >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+    - export SSHPASS=$SSH_PASSWORD
+    - sshpass -e scp -o stricthostkeychecking=no -r "$PWD/target/*.jar" root@qchinese.net:/home/batch
+  only:
+    - master
